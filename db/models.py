@@ -28,8 +28,7 @@ async def get_pair_id(exchange_id, symbol, market_type, base_asset, quote_asset)
             insert_query = """
                            INSERT INTO trading_pairs
                                (exchange_id, symbol, market_type, base_asset, quote_asset)
-                           VALUES ($1, $2, $3, $4, $5)
-                           RETURNING pair_id \
+                           VALUES ($1, $2, $3, $4, $5) RETURNING pair_id \
                            """
             pair_id = await conn.fetchval(insert_query, exchange_id, symbol, market_type, base_asset, quote_asset)
             print(f"已创建新的交易对 '{symbol}'，ID为 {pair_id}")
@@ -60,8 +59,8 @@ async def insert_kline_data(exchange_id, pair_id, timeframe, candles):
                     INSERT INTO kline_data
                     (exchange_id, pair_id, timeframe, close_time, open, high, low, close,
                      volume, quote_volume, trade_num, taker_buy_base_asset_volume, taker_buy_quote_asset_volume)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-                    ON CONFLICT (exchange_id, pair_id, timeframe, close_time) DO NOTHING \
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,
+                            $13) ON CONFLICT (exchange_id, pair_id, timeframe, close_time) DO NOTHING \
                     """
             await conn.executemany(query, values)
             return len(values)

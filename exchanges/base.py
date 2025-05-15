@@ -1,6 +1,7 @@
 """交易所基类"""
 import datetime
 from abc import ABC, abstractmethod
+from typing import List, Dict
 
 from db import models
 from utils import logger
@@ -15,6 +16,9 @@ class BaseExchange(ABC):
     @abstractmethod
     async def fetch_klines(self, symbol, timeframe, start_time, end_time, market_type):
         """获取K线数据"""
+        pass
+
+    async def get_symbols(self) -> Dict[str, List[str]]:
         pass
 
     async def download_data(self, symbol, timeframe, start_time, end_time, market_type='spot'):
@@ -32,7 +36,7 @@ class BaseExchange(ABC):
         end_ts = int(end_time.timestamp() * 1000)
 
         # 获取数据
-        data = await self.fetch_klines(symbol, timeframe, start_ts, end_ts, market_type)
+        data = self.fetch_klines(symbol, timeframe, start_ts, end_ts, market_type)
 
         if data:
             # 获取exchange_id和pair_id

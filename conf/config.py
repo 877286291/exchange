@@ -31,6 +31,7 @@ EXCHANGE_CONFIG = {
         }
     },
     'binance': {
+        'base_url': 'https://api.binance.com',
         'spot_endpoint': 'https://api.binance.com/api/v3/klines',
         'futures_endpoint': 'https://fapi.binance.com/fapi/v1/klines',
         'timeframe_map': {
@@ -42,7 +43,7 @@ EXCHANGE_CONFIG = {
 
 # 默认下载配置
 DEFAULT_DOWNLOAD_CONFIG = {
-    'exchanges': ['bybit', 'okex', 'binance'],
+    'exchanges': ['binance'],
     'symbols': ['ETH/USDT'],
     'market_types': ['spot', 'futures'],
     'timeframe': '1d',

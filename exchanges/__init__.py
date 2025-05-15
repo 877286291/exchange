@@ -8,8 +8,8 @@ def get_exchange(name):
     """获取交易所实例"""
     exchanges = {
         'binance': BinanceExchange,
+        'okex': OKExExchange,
         'bybit': BybitExchange,
-        'okex': OKExExchange
     }
 
     exchange_class = exchanges.get(name.lower())
