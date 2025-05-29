@@ -4,10 +4,11 @@ import datetime
 import multiprocessing
 import os
 import platform
+import time
 from datetime import timezone
 from functools import partial
-import schedule
-import time
+
+from apscheduler.schedulers.background import BackgroundScheduler
 
 from conf.config import DEFAULT_DOWNLOAD_CONFIG
 from db.connection import db_manager
@@ -118,7 +119,7 @@ def run_download(config=None):
     logger.info(f"系统有 {cpu_count} 个CPU核心，将使用 {process_count} 个进程")
 
     # 创建进程池
-    with multiprocessing.Pool(processes=process_count) as pool:
+    with multiprocessing.Pool(processes=1) as pool:
         # 使用偏函数固定config参数
         process_func = partial(run_exchange_process, config=config)
 
@@ -149,14 +150,15 @@ async def get_exchanges_from_db():
     return exchanges
     # return ['binance']
 
+
 def scheduled_job():
     """每日执行的定时任务"""
     logger.info("开始执行每日数据下载任务")
-    
+
     # 设置今天的日期范围
     today = datetime.datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
     yesterday = today - datetime.timedelta(days=1)
-    
+
     config = {
         'market_types': ['spot', 'futures'],
         'timeframes': ['15m', '1h', '4h', '1d'],
@@ -172,20 +174,39 @@ def scheduled_job():
     run_download(config)
     logger.info("每日数据下载任务执行完毕")
 
+
 def main():
     """主函数"""
     logger.info("启动定时任务程序")
 
+    # 创建后台调度器
+    scheduler = BackgroundScheduler()
+
     # 设置每天0点运行任务
-    schedule.every().day.at("00:00").do(scheduled_job)
+    scheduler.add_job(
+        scheduled_job,
+        trigger="interval",
+        minutes=15,
+        id='daily_download',
+        name='每日数据下载任务'
+    )
+
+    # 启动调度器
+    scheduler.start()
+    logger.info("调度器已启动，任务将在每天 00:00 执行")
 
     # 立即运行一次任务（可选）
     scheduled_job()
 
-    # 持续运行，等待定时任务
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    try:
+        # 保持主线程运行
+        while True:
+            time.sleep(1)
+    except (KeyboardInterrupt, SystemExit):
+        # 关闭调度器
+        scheduler.shutdown()
+        logger.info("调度器已关闭")
+
 
 if __name__ == "__main__":
     # 设置多进程启动方法

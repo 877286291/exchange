@@ -3,7 +3,7 @@
 # 数据库配置
 DB_CONFIG = {
     'user': 'postgres',
-    'password': '123456',
+    'password': 'VK2Yquru9gCi',
     'database': 'postgres',
     'host': '127.0.0.1',
     'min_size': 2,
@@ -47,5 +47,5 @@ DEFAULT_DOWNLOAD_CONFIG = {
     'symbols': ['ETH/USDT'],
     'market_types': ['spot', 'futures'],
     'timeframe': '1d',
-    'max_concurrent_tasks': 3
+    'max_concurrent_tasks': 1
 }
