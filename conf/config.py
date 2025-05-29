@@ -3,7 +3,7 @@
 # 数据库配置
 DB_CONFIG = {
     'user': 'postgres',
-    'password': 'VK2Yquru9gCi',
+    'password': '123456',
     'database': 'postgres',
     'host': '127.0.0.1',
     'min_size': 2,

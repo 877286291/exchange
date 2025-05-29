@@ -96,8 +96,6 @@ def run_exchange_process(exchange_name, config):
         return f"{exchange_name} 处理完成"
     except Exception as e:
         logger.error(f"进程 {exchange_name} 发生错误: {str(e)}")
-        import traceback
-        logger.error(traceback.format_exc())
         return f"{exchange_name} 处理失败: {str(e)}"
 
 
@@ -119,7 +117,7 @@ def run_download(config=None):
     logger.info(f"系统有 {cpu_count} 个CPU核心，将使用 {process_count} 个进程")
 
     # 创建进程池
-    with multiprocessing.Pool(processes=1) as pool:
+    with multiprocessing.Pool(processes=process_count) as pool:
         # 使用偏函数固定config参数
         process_func = partial(run_exchange_process, config=config)
 
@@ -164,7 +162,7 @@ def scheduled_job():
         'timeframes': ['15m', '1h', '4h', '1d'],
         'start_time': yesterday,
         'end_time': today,
-        'max_concurrent_tasks': 10
+        'max_concurrent_tasks': 3
     }
 
     # 从数据库获取交易所列表
@@ -176,13 +174,10 @@ def scheduled_job():
 
 
 def main():
-    """主函数"""
     logger.info("启动定时任务程序")
 
-    # 创建后台调度器
     scheduler = BackgroundScheduler()
 
-    # 设置每天0点运行任务
     scheduler.add_job(
         scheduled_job,
         trigger="interval",
@@ -199,11 +194,9 @@ def main():
     scheduled_job()
 
     try:
-        # 保持主线程运行
         while True:
             time.sleep(1)
     except (KeyboardInterrupt, SystemExit):
-        # 关闭调度器
         scheduler.shutdown()
         logger.info("调度器已关闭")
 
